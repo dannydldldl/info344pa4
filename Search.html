@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="utf-8">
+    <title>info344hw2</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+</head>
+
+<body>
+    <div class="ui-widget">
+        <label for="tags"></label>
+        <input id="tags">
+        <button id="search">Search</button>
+    </div>
+    <table id="table2" border="1px"></table>
+    <table id="table" border="1px"></table>
+
+    <script type="text/javascript">
+        $("#tags").keyup(function () {
+            var input = $(this).val().toLowerCase();
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/Search",
+                data: '{input: "' + input + '"}',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (msg) {
+                    $(function () {
+                        var result = msg.d;
+                        $("#tags").autocomplete({
+                            source: msg.d
+                        });
+                    });
+                }
+            });
+        });
+
+        $("#search").click(function () {
+            var input = $('#tags').val().toLowerCase();
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/SearchTable",
+                data: '{input: "' + input + '"}',
+                contentType: "application/json; charset=utf-8",
+                dataType: 'json',
+                success: function (msg) {
+                    $(function () {
+                        $('#table').empty();
+                        var target = '';
+                        for (var i = 0; i < 20; i++)
+                        {
+                            if (msg.d[i] == null)
+                            {
+                                break;
+                            }   
+                            else
+                            {
+                                var item = msg.d[i].split("***");
+                                target += '<tr><td><a href="' + item[0] + '">' + item[1] + '</a></td></tr>';
+                            }
+                        }
+                        $('#table').html(target);
+                    });
+                }
+            });
+        });
+
+        $("#search").click(function () {
+            var query = $('#tags').val().toLowerCase();
+            var url = "http://ec2-54-187-26-146.us-west-2.compute.amazonaws.com/info344/nba/get_stats.php?name=";
+            $.get("http://jsonp.jit.su/?url=" + url + query, function (response) {
+                if (response.length) {
+                    $('#table2').empty();
+                    var row1 = "<tr><td>PlayerName</td><td>GP</td><td>FGP</td><td>TPP</td><td>FTP</td><td>PPG</td></tr>";
+                    var td1 = "<tr><td>" + response[0].PlayerName + "</td>";
+                    var td2 = "<td>" + response[0].GP + "</td>";
+                    var td3 = "<td>" + response[0].FGP + "</td>";
+                    var td4 = "<td>" + response[0].TPP + "</td>";
+                    var td5 = "<td>" + response[0].FTP + "</td>";
+                    var td6 = "<td>" + response[0].PPG + "</td></tr>";
+                    $('#table2').append(row1 + td1 + td2 + td3 + td4 + td5 + td6);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
