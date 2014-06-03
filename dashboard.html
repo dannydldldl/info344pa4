@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title></title>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+</head>
+
+<body>
+    <button type="button" onclick="Start()">Start</button>
+    <button type="button" onclick="Stop()">Stop</button>
+    <button type="button" onclick="Clear()">Clear</button><br />
+    <br />
+
+    <header>Performance of WorkerRole:</header>
+    <table border="1" style="width:300px">
+        <tr>
+            <td>Available Memory</td>
+            <td id="stats0"></td>
+        </tr>
+        <tr>
+            <td>CPU Usage</td>
+            <td id="stats1"></td>
+        </tr>
+        <tr>
+            <td># of records in Cloud Queue</td>
+            <td id="stats2"></td>
+        </tr>
+        <tr>
+            <td># of records in Cloud Table</td>
+            <td id="stats3"></td>
+        </tr>
+        <tr>
+            <td># of links crawled</td>
+            <td id="stats4"></td>
+        </tr>
+        <tr>
+            <td># of repeated link crawled</td>
+            <td id="stats5"></td>
+        </tr>
+    </table><br />
+    <br />
+
+    <header>Last 10 Crawled:</header>
+    <table id="table" border="1" style="width:700px"></table>
+
+
+
+    <script type="text/javascript">
+        var updateStats = setInterval(function () { UpdateStats() }, 1000);
+
+        function UpdateStats() {
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/UpdateStats",
+                contentType: "application/json; charset=utf-8",
+                dataType: "JSON",
+                success: function (msg) {
+                    for (var i = 0; i < 6; i++) {
+                        var id = '#stats' + i;
+                        $(id).html(msg.d[i]);
+                    }
+                    $('#table').empty();
+                    var last10Crawled = '';
+                    for (var i = 6; i < 16; i++)
+                        if (msg.d[i] == null)
+                        {
+                            break;
+                        } else {
+                            last10Crawled += '<tr><td>' + msg.d[i] + '</td></tr>';
+                        }
+                    $('#table').html(last10Crawled);
+                }
+            });
+        }
+
+        function Start() {
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/Start",
+                success: function (msg) {
+                }
+            });
+        }
+
+        function Stop() {
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/Stop",
+                success: function (msg) {
+                }
+            });
+        }
+
+        function Clear() {
+            $.ajax({
+                type: "POST",
+                url: "Admin.asmx/Clear",
+                success: function (msg) {
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
